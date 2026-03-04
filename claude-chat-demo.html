@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direct Rent · IA Assistant — Live Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --teal: #0F4C5C;
+  --bg: #FAF7F2;
+  --orange: #FF7A00;
+  --text: #1F2933;
+  --mid: #6B7B84;
+  --border: #E4DFD8;
+  --sky2: #e8f2f6;
+  --green: #1A7A5A;
+  --white: #fff;
+}
+
+body {
+  font-family: 'Instrument Sans', sans-serif;
+  background: #0f0f1a;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* PHONE SHELL */
+.phone {
+  width: 390px;
+  height: 844px;
+  background: var(--bg);
+  border-radius: 52px;
+  box-shadow: 0 0 0 12px #1e1e30, 0 0 0 14px #0a0a14, 0 40px 100px rgba(0,0,0,.7);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* STATUS BAR */
+.status {
+  background: white;
+  padding: 14px 28px 0;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+/* API KEY SETUP SCREEN */
+.setup-screen {
+  flex: 1;
+  background: var(--teal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 28px;
+  text-align: center;
+}
+
+.setup-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 6px;
+}
+.setup-logo span { color: var(--orange); }
+
+.setup-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,.5);
+  margin-bottom: 40px;
+  line-height: 1.5;
+}
+
+.setup-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.5);
+  margin-bottom: 10px;
+  text-align: left;
+  width: 100%;
+}
+
+.api-input {
+  width: 100%;
+  background: rgba(255,255,255,.1);
+  border: 1.5px solid rgba(255,255,255,.2);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-family: 'Instrument Sans', sans-serif;
+  color: white;
+  outline: none;
+  margin-bottom: 8px;
+  transition: border-color .2s;
+}
+.api-input::placeholder { color: rgba(255,255,255,.3); }
+.api-input:focus { border-color: var(--orange); }
+
+.api-note {
+  font-size: 11px;
+  color: rgba(255,255,255,.3);
+  margin-bottom: 24px;
+  text-align: left;
+  width: 100%;
+  line-height: 1.5;
+}
+
+.start-btn {
+  width: 100%;
+  background: var(--orange);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Instrument Sans', sans-serif;
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: 0 6px 24px rgba(255,122,0,.4);
+}
+.start-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 32px rgba(255,122,0,.5); }
+.start-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.setup-link {
+  margin-top: 16px;
+  font-size: 12px;
+  color: rgba(255,255,255,.35);
+}
+.setup-link a { color: rgba(255,255,255,.6); text-decoration: none; }
+
+/* CHAT SCREEN */
+.chat-screen {
+  flex: 1;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* HEADER */
+.chat-header {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 18px 14px;
+  flex-shrink: 0;
+}
+.ch-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ch-ai {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ch-avatar {
+  width: 36px; height: 36px;
+  background: var(--teal);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.ch-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.ch-status {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--green);
+  margin-top: 1px;
+}
+.ch-reset {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mid);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .2s;
+}
+.ch-reset:hover { border-color: var(--teal); color: var(--teal); }
+
+/* FILTER PILLS */
+.filter-bar {
+  background: white;
+  padding: 8px 14px 10px;
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+
+.fpill {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all .2s;
+  font-family: inherit;
+}
+.fpill.set {
+  background: var(--sky2);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+/* MESSAGES */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+}
+.messages::-webkit-scrollbar { width: 0; }
+
+.msg { display: flex; gap: 8px; align-items: flex-end; }
+.msg.ai { flex-direction: row; }
+.msg.user { flex-direction: row-reverse; }
+
+.ai-av {
+  width: 28px; height: 28px;
+  background: var(--teal);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.bubble {
+  max-width: 76%;
+  padding: 11px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.bubble.ai {
+  background: white;
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.bubble.user {
+  background: var(--teal);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+/* RESULT CARDS */
+.result-card {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all .2s;
+  margin-top: 6px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.05);
+}
+.result-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.1); }
+
+.rc-img {
+  height: 90px;
+  background: linear-gradient(135deg, #B8D4DC, #7FB5C5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  position: relative;
+}
+.rc-badge {
+  position: absolute; top: 8px; left: 8px;
+  background: var(--green); color: white;
+  font-size: 10px; font-weight: 700;
+  padding: 3px 9px; border-radius: 100px;
+}
+.rc-body { padding: 12px 14px; }
+.rc-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.rc-sub { font-size: 12px; color: var(--mid); margin-bottom: 8px; }
+.rc-foot { display: flex; justify-content: space-between; align-items: center; }
+.rc-price { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: var(--teal); }
+.rc-price small { font-family: inherit; font-size: 11px; font-weight: 400; color: var(--mid); }
+.rc-cta { font-size: 12px; font-weight: 700; color: var(--orange); }
+
+/* TYPING */
+.typing-bubble {
+  display: flex; gap: 4px; align-items: center;
+  padding: 14px 16px;
+}
+.dot {
+  width: 7px; height: 7px;
+  background: var(--mid);
+  border-radius: 50%;
+  animation: blink 1.2s infinite;
+}
+.dot:nth-child(2) { animation-delay: .2s; }
+.dot:nth-child(3) { animation-delay: .4s; }
+@keyframes blink {
+  0%, 100% { opacity: .3; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-3px); }
+}
+
+/* SUGGESTIONS */
+.suggestions {
+  padding: 0 14px 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.sug-btn {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.sug-btn:hover { border-color: var(--teal); color: var(--teal); background: var(--sky2); }
+
+/* INPUT */
+.input-row {
+  background: white;
+  border-top: 1px solid var(--border);
+  padding: 10px 14px 28px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.chat-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-family: 'Instrument Sans', sans-serif;
+  color: var(--text);
+  outline: none;
+  resize: none;
+  line-height: 1.4;
+  max-height: 100px;
+  transition: border-color .2s;
+}
+.chat-input:focus { border-color: var(--teal); }
+.chat-input::placeholder { color: var(--mid); }
+
+.send-btn {
+  width: 42px; height: 42px;
+  background: var(--orange);
+  border: none;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all .2s;
+  box-shadow: 0 4px 16px rgba(255,122,0,.35);
+}
+.send-btn:hover { transform: scale(1.08); }
+.send-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+/* ERROR */
+.error-msg {
+  background: rgba(192,57,43,.1);
+  border: 1px solid rgba(192,57,43,.25);
+  color: #C0392B;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* PARSED PARAMS BADGE */
+.params-badge {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.pb {
+  background: var(--sky2);
+  color: var(--teal);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+
+/* Explanation box below phone */
+.explain {
+  margin-top: 28px;
+  max-width: 390px;
+  background: #1a1a2a;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  padding: 24px;
+  color: rgba(255,255,255,.6);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.explain h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 12px;
+}
+.explain code {
+  background: rgba(255,255,255,.08);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #7EC8E3;
+}
+.explain .step {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.explain .step:last-child { border-bottom: none; }
+.explain .step-n {
+  width: 22px; height: 22px;
+  background: var(--orange);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: white;
+  flex-shrink: 0; margin-top: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="status">
+    <span>22:48</span>
+    <div style="display:flex;gap:5px;font-size:11px">📶 🔋</div>
+  </div>
+
+  <!-- SETUP SCREEN -->
+  <div class="setup-screen" id="setup-screen">
+    <div style="font-size:52px;margin-bottom:16px">🤖</div>
+    <div class="setup-logo">Direct Rent<span>.</span></div>
+    <div class="setup-sub">Inserisci la tua API key di Claude per attivare l'assistente IA</div>
+
+    <div class="setup-label">LA TUA CLAUDE API KEY</div>
+    <input
+      type="password"
+      class="api-input"
+      id="api-key-input"
+      placeholder="sk-ant-api03-..."
+      autocomplete="off"
+    >
+    <div class="api-note">
+      🔒 La chiave viene usata solo nel tuo browser, non viene salvata da nessuna parte.<br>
+      Ottienila su console.anthropic.com → API Keys
+    </div>
+
+    <button class="start-btn" id="start-btn" onclick="startChat()">
+      Avvia assistente →
+    </button>
+
+    <div class="setup-link">
+      Non hai ancora una chiave? <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+    </div>
+  </div>
+
+  <!-- CHAT SCREEN -->
+  <div class="chat-screen" id="chat-screen">
+    <div class="chat-header">
+      <div class="ch-top">
+        <div class="ch-ai">
+          <div class="ch-avatar">🤖</div>
+          <div>
+            <div class="ch-name">Assistente Direct Rent</div>
+            <div class="ch-status">● Online · Direct Rent</div>
+          </div>
+        </div>
+        <button class="ch-reset" onclick="resetChat()">↺ Reset</button>
+      </div>
+    </div>
+
+    <div class="filter-bar" id="filter-bar">
+      <button class="fpill" id="pill-date" onclick="insertSuggestion('dal 9 all\'11 marzo')">📅 Date</button>
+      <button class="fpill" id="pill-guests" onclick="insertSuggestion('per 2 persone')">👥 Ospiti</button>
+      <button class="fpill" id="pill-budget" onclick="insertSuggestion('budget 600 euro')">💰 Budget</button>
+      <button class="fpill" id="pill-city" onclick="insertSuggestion('a Roma')">📍 Città</button>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="suggestions" id="suggestions">
+      <button class="sug-btn" onclick="sendMessage('Cerco un appartamento a Firenze per il weekend, 2 persone, budget 400€')">🏛️ Firenze weekend</button>
+      <button class="sug-btn" onclick="sendMessage('Voglio una casa a Milano vicino al Duomo per 4 notti, siamo in 3')">🏙️ Milano 4 notti</button>
+      <button class="sug-btn" onclick="sendMessage('Appartamento sul mare in Sicilia per agosto, budget 1000€, 2 adulti e 1 bambino')">🌊 Sicilia estate</button>
+    </div>
+
+    <div class="input-row">
+      <textarea
+        class="chat-input"
+        id="chat-input"
+        placeholder="Dove vuoi andare? Scrivi liberamente..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendFromInput()">↑</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let apiKey = '';
+let conversationHistory = [];
+let isLoading = false;
+
+// Fake listings database for demo
+const FAKE_LISTINGS = [
+  { emoji: '🏛️', title: 'Appartamento Santa Croce', location: 'Centro storico', size: '65m² · 2 camere', price: 95, tags: ['WiFi', 'Vista Duomo', 'Cucina'] },
+  { emoji: '🌿', title: 'Loft Oltrarno Design', location: 'Oltrarno', size: '45m² · Studio', price: 120, tags: ['Terrazza', 'Aria cond.'] },
+  { emoji: '🏰', title: 'Casa Ponte Vecchio', location: 'Lungarno', size: '90m² · 3 camere', price: 180, tags: ['Vista fiume', 'Parcheggio'] },
+  { emoji: '🌊', title: 'Villa sul Mare', location: 'Taormina', size: '120m² · 3 camere', price: 220, tags: ['Piscina', 'Vista mare', 'Giardino'] },
+  { emoji: '🏙️', title: 'Loft Navigli', location: 'Navigli, Milano', size: '55m² · 1 camera', price: 110, tags: ['Design', 'Metropolitana'] },
+];
+
+const SYSTEM_PROMPT = `Sei l'assistente IA di Direct Rent, una piattaforma italiana di affitti brevi senza commissioni.
+
+Il tuo compito è aiutare i viaggiatori a trovare appartamenti parlando in modo naturale e amichevole in italiano.
+
+REGOLE:
+1. Sei sempre breve e diretto — max 2-3 frasi per risposta
+2. Raccogli queste informazioni: città, date check-in/check-out, numero ospiti, budget massimo
+3. Se mancano informazioni chiedi UNA sola cosa alla volta
+4. Quando hai città + date + ospiti, rispondi ESATTAMENTE così (JSON puro, niente altro):
+   {"action":"search","city":"CITTÀ","checkin":"DATA","checkout":"DATA","guests":N,"budget":N}
+5. Se budget non specificato usa 0 (illimitato)
+6. Sii caldo e italiano — usa espressioni come "Perfetto!", "Ottimo!", "Certo!"
+
+NON spiegare mai il JSON all'utente. Mostralo solo quando hai tutte le info necessarie.`;
+
+function startChat() {
+  const input = document.getElementById('api-key-input');
+  const key = input.value.trim();
+
+  if (!key || !key.startsWith('sk-ant-')) {
+    input.style.borderColor = '#C0392B';
+    input.placeholder = 'Deve iniziare con sk-ant-api03-...';
+    setTimeout(() => {
+      input.style.borderColor = '';
+      input.placeholder = 'sk-ant-api03-...';
+    }, 2000);
+    return;
+  }
+
+  apiKey = key;
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('chat-screen').style.display = 'flex';
+
+  // Welcome message
+  addMessage('ai', 'Ciao! 👋 Sono l\'assistente di <strong>Direct Rent</strong>. Dove vorresti andare e quando? Dimmi tutto — anche in modo informale!');
+}
+
+function addMessage(role, content, isHTML = true) {
+  const messages = document.getElementById('messages');
+
+  const wrapper = document.createElement('div');
+  wrapper.className = `msg ${role}`;
+
+  if (role === 'ai') {
+    const av = document.createElement('div');
+    av.className = 'ai-av';
+    av.textContent = '🤖';
+    wrapper.appendChild(av);
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = `bubble ${role}`;
+  if (isHTML) bubble.innerHTML = content;
+  else bubble.textContent = content;
+
+  wrapper.appendChild(bubble);
+  messages.appendChild(wrapper);
+  messages.scrollTop = messages.scrollHeight;
+
+  return bubble;
+}
+
+function addTyping() {
+  const messages = document.getElementById('messages');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'msg ai';
+  wrapper.id = 'typing-indicator';
+
+  const av = document.createElement('div');
+  av.className = 'ai-av';
+  av.textContent = '🤖';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ai typing-bubble';
+  bubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+
+  wrapper.appendChild(av);
+  wrapper.appendChild(bubble);
+  messages.appendChild(wrapper);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-indicator');
+  if (t) t.remove();
+}
+
+function showResults(city, checkin, checkout, guests, budget) {
+  const nights = Math.max(1, Math.round((new Date(checkout) - new Date(checkin)) / 86400000)) || 2;
+
+  // Filter listings by budget
+  let listings = FAKE_LISTINGS.filter(l => budget === 0 || l.price * nights <= budget);
+  if (listings.length === 0) listings = FAKE_LISTINGS.slice(0, 3);
+  listings = listings.slice(0, 3);
+
+  const messages = document.getElementById('messages');
+  const wrapper = document.createElement('div');
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.gap = '8px';
+  wrapper.style.padding = '0 0 4px';
+
+  listings.forEach(l => {
+    const total = l.price * nights;
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML = `
+      <div class="rc-img">${l.emoji}<div class="rc-badge">✓ Confermato</div></div>
+      <div class="rc-body">
+        <div class="rc-title">${l.title}</div>
+        <div class="rc-sub">📍 ${l.location} · ${l.size}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+          ${l.tags.map(t => `<span style="font-size:10px;background:var(--sky2);color:var(--teal);padding:2px 8px;border-radius:100px;font-weight:700">${t}</span>`).join('')}
+        </div>
+        <div class="rc-foot">
+          <div class="rc-price">€${total} <small>/ ${nights} nott${nights===1?'e':'i'}</small></div>
+          <div class="rc-cta">Scegli →</div>
+        </div>
+      </div>
+    `;
+    wrapper.appendChild(card);
+  });
+
+  messages.appendChild(wrapper);
+  messages.scrollTop = messages.scrollHeight;
+
+  // Update filter pills
+  if (checkin) { document.getElementById('pill-date').textContent = `📅 ${checkin}`; document.getElementById('pill-date').classList.add('set'); }
+  if (guests) { document.getElementById('pill-guests').textContent = `👥 ${guests} ospiti`; document.getElementById('pill-guests').classList.add('set'); }
+  if (budget) { document.getElementById('pill-budget').textContent = `💰 €${budget}`; document.getElementById('pill-budget').classList.add('set'); }
+
+  // Hide suggestions after first result
+  document.getElementById('suggestions').style.display = 'none';
+}
+
+async function sendMessage(text) {
+  if (isLoading || !text.trim()) return;
+  if (!apiKey) { alert('Inserisci prima la tua API key!'); return; }
+
+  isLoading = true;
+  document.getElementById('send-btn').disabled = true;
+  document.getElementById('suggestions').style.display = 'none';
+
+  // Add user message
+  addMessage('user', text, false);
+  conversationHistory.push({ role: 'user', content: text });
+
+  // Show typing
+  addTyping();
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 500,
+        system: SYSTEM_PROMPT,
+        messages: conversationHistory
+      })
+    });
+
+    removeTyping();
+
+    if (!response.ok) {
+      const err = await response.json();
+      const errMsg = err.error?.message || 'Errore API';
+
+      if (response.status === 401) {
+        addMessage('ai', '<div class="error-msg">❌ API key non valida. Controlla su console.anthropic.com e riprova.</div>');
+      } else if (response.status === 429) {
+        addMessage('ai', '<div class="error-msg">⏳ Troppe richieste. Aspetta un momento e riprova.</div>');
+      } else {
+        addMessage('ai', `<div class="error-msg">❌ Errore: ${errMsg}</div>`);
+      }
+      isLoading = false;
+      document.getElementById('send-btn').disabled = false;
+      return;
+    }
+
+    const data = await response.json();
+    const aiText = data.content[0].text.trim();
+
+    // Add to history
+    conversationHistory.push({ role: 'assistant', content: aiText });
+
+    // Try to parse JSON action
+    let parsed = null;
+    try {
+      // Extract JSON if embedded in text
+      const jsonMatch = aiText.match(/\{[^}]+\}/);
+      if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+    } catch(e) {}
+
+    if (parsed && parsed.action === 'search') {
+      addMessage('ai', `Ho trovato quello che cercavi! Sto contattando i proprietari a <strong>${parsed.city}</strong> disponibili per le tue date... ⚡`);
+
+      // Simulate loading then show results
+      setTimeout(() => {
+        addMessage('ai', '<strong>3 proprietari confermati</strong> in meno di 5 minuti! 🎉 Tutti verificati e disponibili:');
+        showResults(parsed.city, parsed.checkin, parsed.checkout, parsed.guests, parsed.budget || 0);
+      }, 1200);
+    } else {
+      // Normal conversational response — clean up any JSON leakage
+      const cleanText = aiText.replace(/\{[^}]+\}/g, '').trim();
+      addMessage('ai', cleanText || aiText);
+    }
+
+  } catch (err) {
+    removeTyping();
+    if (err.name === 'TypeError' && err.message.includes('fetch')) {
+      addMessage('ai', '<div class="error-msg">🌐 Errore di rete. Controlla la connessione internet.</div>');
+    } else {
+      addMessage('ai', `<div class="error-msg">❌ ${err.message}</div>`);
+    }
+  }
+
+  isLoading = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+function sendFromInput() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (text) {
+    input.value = '';
+    autoResize(input);
+    sendMessage(text);
+  }
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendFromInput();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function insertSuggestion(text) {
+  const input = document.getElementById('chat-input');
+  input.value += (input.value ? ' ' : '') + text;
+  input.focus();
+  autoResize(input);
+}
+
+function resetChat() {
+  conversationHistory = [];
+  document.getElementById('messages').innerHTML = '';
+  document.getElementById('suggestions').style.display = 'flex';
+  document.querySelectorAll('.fpill').forEach(p => p.classList.remove('set'));
+  document.getElementById('pill-date').textContent = '📅 Date';
+  document.getElementById('pill-guests').textContent = '👥 Ospiti';
+  document.getElementById('pill-budget').textContent = '💰 Budget';
+  document.getElementById('pill-city').textContent = '📍 Città';
+  addMessage('ai', 'Chat resettata! 🔄 Di nuovo da capo — dove vorresti andare?');
+}
+</script>
+</body>
+</html>
