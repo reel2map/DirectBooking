@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>locanda — App Prototype v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --teal: #0F4C5C;
+  --bg: #FAF7F2;
+  --orange: #FF7A00;
+  --orange2: #FF9733;
+  --text: #1F2933;
+  --sky: #C7D9E2;
+  --sky2: #e8f2f6;
+  --mid: #6B7B84;
+  --border: #E4DFD8;
+  --white: #FFFFFF;
+  --green: #1A7A5A;
+  --green2: #e8f5ef;
+  --red: #C0392B;
+}
+
+body {
+  font-family: 'Instrument Sans', sans-serif;
+  background: #0f0f1a;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px 120px;
+}
+
+.proto-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.proto-header h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px; font-weight: 800; color: white; margin-bottom: 6px;
+}
+.proto-header p { font-size: 13px; color: rgba(255,255,255,0.35); }
+
+/* PHONE */
+.phone {
+  width: 390px; height: 844px;
+  background: var(--bg);
+  border-radius: 52px;
+  box-shadow: 0 0 0 12px #1e1e30, 0 0 0 14px #0a0a14, 0 40px 100px rgba(0,0,0,0.7);
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* STATUS */
+.sb {
+  height: 50px; background: inherit;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px 0;
+  font-size: 13px; font-weight: 600; color: var(--text);
+  flex-shrink: 0; position: relative; z-index: 2;
+}
+.sb-icons { display: flex; gap: 5px; font-size: 11px; }
+
+/* SCREENS */
+.screen {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg);
+  display: none; flex-direction: column; overflow: hidden;
+}
+.screen.active { display: flex; }
+
+/* ── HELPERS ── */
+.app-bar {
+  background: white; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.ab-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 54px 18px 14px;
+}
+.ab-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); }
+.ab-sub { text-align: center; font-size: 11px; color: var(--mid); padding-bottom: 10px; }
+
+.back { width: 36px; height: 36px; border-radius: 50%; background: var(--bg); border: none; cursor: pointer; font-size: 18px; color: var(--text); display: flex; align-items: center; justify-content: center; }
+
+.scroll { flex: 1; overflow-y: auto; }
+::-webkit-scrollbar { width: 0; }
+
+.btn-orange {
+  background: var(--orange); color: white; border: none;
+  border-radius: 16px; padding: 17px; width: 100%;
+  font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer;
+  transition: all .2s; box-shadow: 0 4px 20px rgba(255,122,0,.35);
+}
+.btn-orange:hover { background: var(--orange2); transform: translateY(-1px); }
+
+.btn-ghost {
+  background: var(--bg); color: var(--mid); border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 17px; width: 100%;
+  font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer;
+}
+
+.tab-bar {
+  background: white; border-top: 1px solid var(--border);
+  padding: 8px 0 24px; display: flex; flex-shrink: 0;
+}
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 6px 0; }
+.ti-icon { font-size: 22px; }
+.ti-label { font-size: 10px; font-weight: 600; color: var(--mid); }
+.tab-item.on .ti-label { color: var(--teal); }
+
+.section-lbl {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--mid); margin-bottom: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.section-lbl a { font-size: 12px; color: var(--teal); letter-spacing: 0; text-transform: none; font-weight: 600; }
+
+.pill-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 100px;
+  font-size: 12px; font-weight: 700;
+}
+
+/* ══════════════════════════════════
+   SCREEN 1 · WELCOME
+══════════════════════════════════ */
+#s-welcome {
+  background: var(--teal);
+  justify-content: center; align-items: center;
+  text-align: center; padding: 0 32px;
+}
+.w-logo { font-family: 'Syne', sans-serif; font-size: 38px; font-weight: 800; color: white; margin-bottom: 6px; }
+.w-logo span { color: var(--orange); }
+.w-tag { font-size: 14px; color: rgba(255,255,255,.45); margin-bottom: 56px; font-weight: 300; }
+
+.toggle-wrap { background: rgba(255,255,255,.12); border-radius: 100px; padding: 5px; display: flex; margin-bottom: 40px; width: 100%; max-width: 280px; }
+.tog { flex: 1; padding: 13px 0; border: none; border-radius: 100px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all .3s; background: transparent; color: rgba(255,255,255,.5); }
+.tog.on { background: white; color: var(--teal); box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+
+.w-desc { font-size: 14px; color: rgba(255,255,255,.45); line-height: 1.6; margin-bottom: 36px; max-width: 260px; }
+.w-note { font-size: 12px; color: rgba(255,255,255,.3); margin-top: 14px; }
+.w-note strong { color: rgba(255,255,255,.6); }
+
+/* ══════════════════════════════════
+   SCREEN 2 · VERIFY
+══════════════════════════════════ */
+#s-verify {
+  background: var(--bg);
+}
+.verify-body { padding: 24px 20px; display: flex; flex-direction: column; gap: 16px; }
+
+.trust-levels { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+.tl-card {
+  background: white; border-radius: 18px; padding: 18px;
+  border: 2px solid var(--border); display: flex; gap: 14px; align-items: center;
+  transition: all .2s; cursor: pointer;
+}
+.tl-card.active { border-color: var(--teal); background: var(--sky2); }
+.tl-badge { font-size: 24px; flex-shrink: 0; width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: var(--bg); }
+.tl-info { flex: 1; }
+.tl-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.tl-desc { font-size: 12px; color: var(--mid); line-height: 1.4; }
+.tl-check { color: var(--teal); font-size: 18px; opacity: 0; }
+.tl-card.active .tl-check { opacity: 1; }
+
+.doc-upload {
+  background: white; border-radius: 18px; padding: 20px;
+  border: 2px dashed var(--border);
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; text-align: center; cursor: pointer;
+  transition: border-color .2s;
+}
+.doc-upload:hover { border-color: var(--teal); }
+.doc-upload-icon { font-size: 36px; }
+.doc-upload-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.doc-upload-sub { font-size: 12px; color: var(--mid); }
+
+.selfie-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.selfie-slot {
+  background: white; border-radius: 16px; border: 2px dashed var(--border);
+  aspect-ratio: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer; font-size: 12px; color: var(--mid); transition: all .2s;
+}
+.selfie-slot.done { background: var(--green2); border-color: var(--green); border-style: solid; }
+.selfie-slot:hover { border-color: var(--teal); }
+.ss-icon { font-size: 28px; }
+
+/* ══════════════════════════════════
+   SCREEN 3 · GUEST CHAT
+══════════════════════════════════ */
+#s-guest { background: var(--bg); }
+
+.filter-bar {
+  background: white; padding: 10px 14px;
+  display: flex; gap: 7px; border-bottom: 1px solid var(--border);
+  flex-shrink: 0; overflow-x: auto;
+}
+.fpill {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 100px; padding: 7px 12px;
+  font-size: 12px; font-weight: 600; color: var(--text);
+  white-space: nowrap; cursor: pointer; flex-shrink: 0; transition: all .2s;
+}
+.fpill.set { background: var(--sky2); border-color: var(--teal); color: var(--teal); }
+
+.chat-area { flex: 1; overflow-y: auto; padding: 18px 14px; display: flex; flex-direction: column; gap: 14px; }
+.msg { display: flex; gap: 8px; align-items: flex-end; }
+.msg.ai { flex-direction: row; }
+.msg.user { flex-direction: row-reverse; }
+.ai-av { width: 30px; height: 30px; background: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.bubble { max-width: 74%; padding: 11px 15px; border-radius: 20px; font-size: 14px; line-height: 1.5; }
+.bubble.ai { background: white; color: var(--text); border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.bubble.user { background: var(--teal); color: white; border-bottom-right-radius: 4px; }
+.typing { display: flex; gap: 4px; align-items: center; }
+.dot { width: 7px; height: 7px; background: var(--mid); border-radius: 50%; animation: blink 1.2s infinite; }
+.dot:nth-child(2){animation-delay:.2s} .dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+
+.chat-input-row { background: white; border-top: 1px solid var(--border); padding: 10px 14px 28px; display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
+.ci { flex: 1; background: var(--bg); border: 1.5px solid var(--border); border-radius: 20px; padding: 11px 14px; font-size: 14px; font-family: inherit; color: var(--text); outline: none; resize: none; line-height: 1.4; }
+.send-btn { width: 42px; height: 42px; background: var(--orange); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; flex-shrink: 0; color: white; font-weight: 700; }
+
+/* ══════════════════════════════════
+   SCREEN 4 · CHAT HISTORY
+══════════════════════════════════ */
+#s-history { background: var(--bg); }
+.history-list { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.hc-item {
+  background: white; border-radius: 18px; padding: 16px;
+  border: 1.5px solid var(--border); display: flex; gap: 12px;
+  cursor: pointer; transition: all .2s;
+}
+.hc-item:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.07); }
+.hc-item.unread { border-color: var(--orange); background: #FFF8F2; }
+.hci-icon { width: 44px; height: 44px; border-radius: 14px; background: var(--sky2); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.hci-body { flex: 1; min-width: 0; }
+.hci-top { display: flex; justify-content: space-between; margin-bottom: 3px; }
+.hci-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.hci-time { font-size: 11px; color: var(--mid); }
+.hci-preview { font-size: 13px; color: var(--mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hci-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.hci-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px; background: var(--sky2); color: var(--teal); }
+
+/* ══════════════════════════════════
+   SCREEN 5 · RESULTS
+══════════════════════════════════ */
+#s-results { background: var(--bg); }
+.rc { background: white; border-radius: 18px; overflow: hidden; border: 1.5px solid var(--border); cursor: pointer; transition: all .2s; margin-bottom: 10px; }
+.rc:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.09); }
+.rc-img { height: 100px; background: linear-gradient(135deg, #B8D4DC, #7FB5C5); display: flex; align-items: center; justify-content: center; font-size: 32px; position: relative; }
+.rc-verified { position: absolute; top: 8px; left: 8px; background: var(--green); color: white; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px; }
+.rc-trust { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.5); color: white; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px; }
+.rc-body { padding: 12px 14px; }
+.rc-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.rc-sub { font-size: 12px; color: var(--mid); margin-bottom: 8px; }
+.rc-foot { display: flex; justify-content: space-between; align-items: center; }
+.rc-price { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; color: var(--teal); }
+.rc-price small { font-family: inherit; font-size: 11px; font-weight: 400; color: var(--mid); }
+.rc-cta { font-size: 12px; font-weight: 700; color: var(--orange); }
+
+/* ══════════════════════════════════
+   SCREEN 6 · HOST DASHBOARD
+══════════════════════════════════ */
+#s-dash { background: var(--bg); }
+
+.dash-hdr {
+  background: var(--teal); padding: 54px 20px 20px; flex-shrink: 0;
+}
+.dh-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.dh-greet { font-size: 13px; color: rgba(255,255,255,.5); margin-bottom: 3px; }
+.dh-name { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: white; letter-spacing: -.5px; }
+.dh-av { width: 44px; height: 44px; background: var(--orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: white; font-family: 'Syne', sans-serif; }
+.dh-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.dhs { background: rgba(255,255,255,.1); border-radius: 14px; padding: 12px; text-align: center; }
+.dhs-val { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: white; letter-spacing: -.5px; }
+.dhs-val span { color: var(--orange); }
+.dhs-lbl { font-size: 10px; color: rgba(255,255,255,.45); margin-top: 2px; }
+
+.dash-body { flex: 1; overflow-y: auto; padding: 18px; }
+
+.notif-card { background: white; border-radius: 18px; padding: 15px; margin-bottom: 10px; border: 1.5px solid var(--border); display: flex; gap: 11px; cursor: pointer; transition: all .2s; }
+.notif-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.07); }
+.notif-card.hot { border-color: var(--orange); background: #FFF8F2; }
+.nc-icon { width: 42px; height: 42px; border-radius: 13px; background: var(--sky2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.nc-body { flex: 1; }
+.nc-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.nc-sub { font-size: 12px; color: var(--mid); line-height: 1.4; }
+.nc-actions { display: flex; gap: 8px; margin-top: 10px; }
+.nc-confirm { flex: 1; padding: 9px; background: var(--orange); color: white; border: none; border-radius: 10px; font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer; }
+.nc-decline { flex: 1; padding: 9px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; color: var(--mid); }
+
+/* ══════════════════════════════════
+   SCREEN 7 · CALENDAR
+══════════════════════════════════ */
+#s-calendar { background: var(--bg); }
+.cal-wrap { padding: 16px; flex: 1; overflow-y: auto; }
+
+.cal-month-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.cal-month-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--text); }
+.cal-nav-btn { width: 36px; height: 36px; border-radius: 50%; background: white; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: all .2s; }
+.cal-nav-btn:hover { background: var(--sky2); border-color: var(--teal); }
+
+.cal-grid-head { display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 6px; }
+.cal-dow { text-align: center; font-size: 11px; font-weight: 700; color: var(--mid); padding: 4px 0; }
+
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin-bottom: 20px; }
+.cal-day {
+  aspect-ratio: 1; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; position: relative;
+  transition: all .15s;
+}
+.cal-day:hover { background: var(--sky2); }
+.cal-day.empty { cursor: default; }
+.cal-day.empty:hover { background: transparent; }
+.cal-day.booked { background: var(--teal); color: white; font-weight: 700; }
+.cal-day.pending { background: rgba(255,122,0,.15); color: var(--orange); font-weight: 700; }
+.cal-day.blocked { background: var(--bg); color: var(--border); text-decoration: line-through; }
+.cal-day.today { border: 2px solid var(--orange); font-weight: 700; }
+.cal-day.range { background: var(--sky2); color: var(--teal); }
+
+.cal-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.cl-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--mid); }
+.cl-dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
+
+.booking-list { display: flex; flex-direction: column; gap: 8px; }
+.bl-item { background: white; border-radius: 14px; padding: 14px; border: 1.5px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.bli-left { }
+.bli-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.bli-dates { font-size: 12px; color: var(--mid); }
+.bli-price { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: var(--teal); }
+
+/* ══════════════════════════════════
+   SCREEN 8 · CONTRACT
+══════════════════════════════════ */
+#s-contract { background: var(--bg); }
+.contract-body { padding: 20px; flex: 1; overflow-y: auto; }
+
+.contract-hero {
+  background: var(--teal); border-radius: 20px; padding: 24px;
+  text-align: center; margin-bottom: 20px;
+}
+.ch-icon { font-size: 44px; margin-bottom: 12px; display: block; }
+.ch-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: white; letter-spacing: -.5px; margin-bottom: 6px; }
+.ch-sub { font-size: 13px; color: rgba(255,255,255,.55); line-height: 1.5; }
+
+.contract-info { background: white; border-radius: 18px; padding: 20px; border: 1.5px solid var(--border); margin-bottom: 16px; }
+.ci-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.ci-row:last-child { border-bottom: none; }
+.ci-label { color: var(--mid); font-weight: 500; }
+.ci-value { color: var(--text); font-weight: 700; text-align: right; }
+
+.contract-preview {
+  background: white; border-radius: 18px; padding: 20px;
+  border: 1.5px solid var(--border); margin-bottom: 16px;
+  position: relative; overflow: hidden;
+}
+.cp-watermark {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-30deg);
+  font-size: 48px; font-weight: 800; color: rgba(15,76,92,.06);
+  font-family: 'Syne', sans-serif; white-space: nowrap; pointer-events: none;
+}
+.cp-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 12px; letter-spacing: -.3px; }
+.cp-text { font-size: 12px; color: var(--mid); line-height: 1.7; }
+.cp-text strong { color: var(--text); font-weight: 600; }
+
+.ai-gen-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(26,122,90,.08); border: 1px solid rgba(26,122,90,.2);
+  border-radius: 12px; padding: 10px 14px; margin-bottom: 16px;
+  font-size: 12px; color: var(--green); font-weight: 600;
+}
+
+.sign-area { background: white; border-radius: 18px; padding: 20px; border: 2px dashed var(--border); text-align: center; margin-bottom: 16px; cursor: pointer; transition: border-color .2s; }
+.sign-area:hover { border-color: var(--teal); }
+.sign-icon { font-size: 28px; margin-bottom: 6px; }
+.sign-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.sign-sub { font-size: 12px; color: var(--mid); }
+
+/* ══════════════════════════════════
+   SCREEN 9 · VERIFY GUEST (from host POV)
+══════════════════════════════════ */
+#s-guest-profile { background: var(--bg); }
+.gp-body { padding: 20px; flex: 1; overflow-y: auto; }
+
+.gp-hero { text-align: center; margin-bottom: 24px; }
+.gp-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 12px; position: relative; }
+.gp-level { position: absolute; bottom: -4px; right: -4px; font-size: 16px; background: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+.gp-name { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -.5px; margin-bottom: 4px; }
+.gp-member { font-size: 12px; color: var(--mid); margin-bottom: 12px; }
+
+.gp-badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+.gpb { display: flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 700; }
+.gpb.blue { background: rgba(15,76,92,.1); color: var(--teal); }
+.gpb.green { background: rgba(26,122,90,.1); color: var(--green); }
+.gpb.gold { background: rgba(255,122,0,.1); color: var(--orange); }
+
+.gp-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.gps { background: white; border-radius: 14px; padding: 14px; text-align: center; border: 1.5px solid var(--border); }
+.gps-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--teal); }
+.gps-lbl { font-size: 10px; color: var(--mid); margin-top: 3px; }
+
+.gp-section { background: white; border-radius: 18px; padding: 18px; border: 1.5px solid var(--border); margin-bottom: 12px; }
+.gps-title { font-size: 13px; font-weight: 700; color: var(--mid); letter-spacing: .5px; margin-bottom: 12px; text-transform: uppercase; font-size: 11px; }
+.verify-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.verify-row:last-child { border-bottom: none; }
+.vr-icon { font-size: 16px; flex-shrink: 0; width: 24px; text-align: center; }
+.vr-label { flex: 1; color: var(--text); font-weight: 500; }
+.vr-status { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; }
+.vr-ok { background: var(--green2); color: var(--green); }
+.vr-no { background: #fde; color: var(--red); }
+
+.review-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.review-item:last-child { border-bottom: none; }
+.ri-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.ri-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.ri-stars { font-size: 12px; }
+.ri-text { font-size: 12px; color: var(--mid); line-height: 1.5; }
+
+/* ══════════════════════════════════
+   NAV FLOW
+══════════════════════════════════ */
+.nav-flow {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;
+  background: rgba(0,0,0,.75); backdrop-filter: blur(12px);
+  padding: 10px 14px; border-radius: 20px; z-index: 1000;
+  max-width: 420px;
+}
+.nf-btn {
+  padding: 7px 12px; border: none; border-radius: 100px;
+  font-size: 11px; font-weight: 700; font-family: inherit; cursor: pointer;
+  background: rgba(255,255,255,.12); color: rgba(255,255,255,.7);
+  transition: all .2s; white-space: nowrap;
+}
+.nf-btn:hover { background: rgba(255,255,255,.22); color: white; }
+.nf-btn.on { background: var(--orange); color: white; }
+</style>
+</head>
+<body>
+
+<div class="proto-header">
+  <h1>locanda · App Prototype v2</h1>
+  <p>Usa i bottoni in basso per navigare · 9 schermi interattivi</p>
+</div>
+
+<div class="phone">
+
+<!-- ═══ 1 · WELCOME ═══ -->
+<div class="screen active" id="s-welcome">
+  <div style="height:50px;display:flex;align-items:center;justify-content:space-between;padding:14px 28px 0;font-size:13px;font-weight:600;color:white;flex-shrink:0">
+    <span>22:48</span><div style="display:flex;gap:5px;font-size:11px">📶 🔋</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;">
+    <div style="font-size:52px;margin-bottom:14px;">🏠</div>
+    <div class="w-logo">locanda<span>.</span></div>
+    <div class="w-tag">Affitta senza commissioni</div>
+
+    <div class="toggle-wrap">
+      <button class="tog on" id="tog-guest" onclick="setRole('guest')">🔍 Cerco</button>
+      <button class="tog" id="tog-host" onclick="setRole('host')">🏠 Affitto</button>
+    </div>
+
+    <div class="w-desc" id="w-desc">Trova l'appartamento perfetto. L'IA cerca tra proprietari verificati.</div>
+
+    <button class="btn-orange" onclick="goScreen('verify')" style="margin-bottom:10px">Continua →</button>
+    <button class="btn-ghost" onclick="goScreen('dash')">Ho già un account</button>
+    <div class="w-note" style="margin-top:14px"><strong>✓ 3 mesi gratis</strong> · Nessuna carta</div>
+  </div>
+</div>
+
+<!-- ═══ 2 · VERIFY IDENTITY ═══ -->
+<div class="screen" id="s-verify">
+  <div class="sb"><span>22:48</span><div class="sb-icons">📶 🔋</div></div>
+  <div class="app-bar">
+    <div class="ab-top">
+      <button class="back" onclick="goScreen('welcome')">←</button>
+      <span class="ab-title">Verifica identità</span>
+      <div style="width:36px"></div>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <div class="verify-body">
+      <div style="font-size:13px;color:var(--mid);line-height:1.6;margin-bottom:4px;">
+        Scegli il tuo livello di verifica. Più sei verificato, più i proprietari si fidano di te.
+      </div>
+
+      <div class="trust-levels">
+        <div class="tl-card active" onclick="selectLevel(this)">
+          <div class="tl-badge">🔵</div>
+          <div class="tl-info">
+            <div class="tl-name">Базовый — Email</div>
+            <div class="tl-desc">Solo email confermata. Accesso base alla piattaforma.</div>
+          </div>
+          <div class="tl-check">✓</div>
+        </div>
+        <div class="tl-card" onclick="selectLevel(this)">
+          <div class="tl-badge">🟢</div>
+          <div class="tl-info">
+            <div class="tl-name">Affidabile — Documento</div>
+            <div class="tl-desc">Documento + selfie verificati. Maggiore fiducia dai proprietari.</div>
+          </div>
+          <div class="tl-check">✓</div>
+        </div>
+        <div class="tl-card" onclick="selectLevel(this)">
+          <div class="tl-badge">⭐</div>
+          <div class="tl-info">
+            <div class="tl-name">Top Guest — 10+ soggiorni</div>
+            <div class="tl-desc">10+ soggiorni senza incidenti. Priorità nelle ricerche.</div>
+          </div>
+          <div class="tl-check">✓</div>
+        </div>
+      </div>
+
+      <div class="doc-upload" onclick="this.style.borderColor='var(--teal)'">
+        <div class="doc-upload-icon">🪪</div>
+        <div class="doc-upload-title">Fotografa il documento</div>
+        <div class="doc-upload-sub">Passaporto, carta d'identità o patente · 60 secondi</div>
+      </div>
+
+      <div class="selfie-row">
+        <div class="selfie-slot done">
+          <div class="ss-icon">🪪</div>
+          <div style="font-size:11px;font-weight:700;color:var(--green)">Fronte ✓</div>
+        </div>
+        <div class="selfie-slot" onclick="this.classList.add('done');this.innerHTML='<div class=\'ss-icon\'>🤳</div><div style=\'font-size:11px;font-weight:700;color:var(--green)\'>Selfie ✓</div>'">
+          <div class="ss-icon">🤳</div>
+          <div>Selfie</div>
+        </div>
+      </div>
+
+      <div style="padding:0 0 20px">
+        <button class="btn-orange" onclick="goScreen('guest')">Continua verificato 🟢 →</button>
+        <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--mid);cursor:pointer" onclick="goScreen('guest')">Salta per ora (solo email)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 3 · GUEST CHAT ═══ -->
+<div class="screen" id="s-guest">
+  <div class="sb"><span>22:48</span><div class="sb-icons">📶 🔋</div></div>
+  <div class="app-bar">
+    <div class="ab-top">
+      <button class="back" onclick="goScreen('history')">☰</button>
+      <div>
+        <div class="ab-title" style="text-align:center">Assistente IA</div>
+        <div style="font-size:11px;color:var(--green);font-weight:600;text-align:center;margin-top:1px">● Online</div>
+      </div>
+      <button class="back" onclick="goScreen('guest-profile')" style="font-size:14px">👤</button>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="fpill set">📅 9–11 feb</div>
+    <div class="fpill">👥 2 ospiti</div>
+    <div class="fpill">💰 €600</div>
+    <div class="fpill">👶 No bambini</div>
+  </div>
+
+  <div class="chat-area" id="chat-msgs">
+    <div class="msg ai">
+      <div class="ai-av">🤖</div>
+      <div class="bubble ai">Ciao Sara! Sono il tuo assistente locanda. Dove vuoi andare e quando? 😊</div>
+    </div>
+    <div class="msg user">
+      <div class="bubble user">Cerco appartamento a Firenze, centro, 9–11 febbraio, 2 persone, max €600</div>
+    </div>
+    <div class="msg ai" id="typing-msg">
+      <div class="ai-av">🤖</div>
+      <div class="bubble ai typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
+  </div>
+
+  <div class="chat-input-row">
+    <textarea class="ci" placeholder="Scrivi cosa cerchi..." rows="1" id="ci-text"></textarea>
+    <button class="send-btn" onclick="sendChat()">↑</button>
+  </div>
+</div>
+
+<!-- ═══ 4 · CHAT HISTORY ═══ -->
+<div class="screen" id="s-history">
+  <div class="sb"><span>22:48</span><div class="sb-icons">📶 🔋</div></div>
+  <div class="app-bar">
+    <div class="ab-top">
+      <button class="back" onclick="goScreen('guest')">←</button>
+      <span class="ab-title">Ricerche precedenti</span>
+      <button class="back" style="font-size:13px;font-weight:700;color:var(--orange);background:none;border:none;cursor:pointer;width:auto;padding:4px 8px" onclick="goScreen('guest')">+ Nuova</button>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <div class="history-list">
+      <div style="font-size:12px;color:var(--mid);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">Questa settimana</div>
+
+      <div class="hc-item unread" onclick="goScreen('results')">
+        <div class="hci-icon">🔍</div>
+        <div class="hci-body">
+          <div class="hci-top">
+            <div class="hci-name">Firenze · 9–11 feb</div>
+            <div class="hci-time">oggi</div>
+          </div>
+          <div class="hci-preview">3 risultati confermati trovati</div>
+          <div class="hci-tags"><span class="hci-tag">2 ospiti</span><span class="hci-tag">€600</span><span class="hci-tag">Centro</span></div>
+        </div>
+      </div>
+
+      <div class="hc-item" onclick="goScreen('guest')">
+        <div class="hci-icon">🔍</div>
+        <div class="hci-body">
+          <div class="hci-top">
+            <div class="hci-name">Roma · 14–16 feb</div>
+            <div class="hci-time">ieri</div>
+          </div>
+          <div class="hci-preview">Nessun risultato per quelle date</div>
+          <div class="hci-tags"><span class="hci-tag">4 ospiti</span><span class="hci-tag">€900</span></div>
+        </div>
+      </div>
+
+      <div style="font-size:12px;color:var(--mid);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin:12px 0 4px">Mese scorso</div>
+
+      <div class="hc-item" onclick="goScreen('guest')">
+        <div class="hci-icon">💬</div>
+        <div class="hci-body">
+          <div class="hci-top">
+            <div class="hci-name">Marco · Via Da Vinci 17</div>
+            <div class="hci-time">12 gen</div>
+          </div>
+          <div class="hci-preview">"Certo, il check-in è possibile dalle 15:00"</div>
+          <div class="hci-tags"><span class="hci-tag">Prenotato ✓</span><span class="hci-tag">Firenze</span></div>
+        </div>
+      </div>
+
+      <div class="hc-item" onclick="goScreen('guest')">
+        <div class="hci-icon">⭐</div>
+        <div class="hci-body">
+          <div class="hci-top">
+            <div class="hci-name">Venezia · 28–30 dic</div>
+            <div class="hci-time">28 dic</div>
+          </div>
+          <div class="hci-preview">Soggiorno completato · Recensione lasciata</div>
+          <div class="hci-tags"><span class="hci-tag">★★★★★</span><span class="hci-tag">2 ospiti</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab-item" onclick="goScreen('guest')"><div class="ti-icon">🤖</div><div class="ti-label">IA Chat</div></div>
+    <div class="tab-item on"><div class="ti-icon">🕐</div><div class="ti-label">Storico</div></div>
+    <div class="tab-item" onclick="goScreen('results')"><div class="ti-icon">🏠</div><div class="ti-label">Risultati</div></div>
+    <div class="tab-item" onclick="goScreen('guest-profile')"><div class="ti-icon">👤</div><div class="ti-label">Profilo</div></div>
+  </div>
+</div>
+
+<!-- ═══ 5 · RESULTS ═══ -->
+<div class="screen" id="s-results">
+  <div class="sb"><span>22:48</span><div class="sb-icons">📶 🔋</div></div>
+  <div class="app-bar">
+    <div class="ab-top">
+      <button class="back" onclick="goScreen('guest')">←</button>
+      <div><div class="ab-title" style="text-align:center">3 risultati</div><div style="font-size:11px;color:var(--mid);text-align:center">Firenze · 9–11 feb · 2 ospiti</div></div>
+      <div style="width:36px"></div>
+    </div>
+  </div>
+
+  <div class="chat-area" style="padding:14px">
+    <div class="msg ai" style="margin-bottom:6px">
+      <div class="ai-av">🤖</div>
+      <div class="bubble ai"><strong>3 proprietari confermati</strong> in meno di 5 min! 🎉 Tutti verificati.</div>
+    </div>
+
+    <div class="rc" onclick="goScreen('contract')">
+      <div class="rc-img">🏛️<div class="rc-verified">✓ Confermato</div><div class="rc-trust">🟢 Affidabile</div></div>
+      <div class="rc-body">
+        <div class="rc-title">Appartamento Santa Croce</div>
+        <div class="rc-sub">📍 Centro storico · 2 camere · 65m²</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+          <span style="font-size:10px;background:var(--sky2);color:var(--teal);padding:2px 8px;border-radius:100px;font-weight:700">WiFi</span>
+          <span style="font-size:10px;background:var(--sky2);color:var(--teal);padding:2px 8px;border-radius:100px;font-weight:700">Vista Duomo</span>
+          <span style="font-size:10px;background:var(--sky2);color:var(--teal);padding:2px 8px;border-radius:100px;font-weight:700">Cucina</span>
+        </div>
+        <div class="rc-foot"><div class="rc-price">€280 <small>/ 2 notti</small></div><div class="rc-cta">Scegli e firma →</div></div>
+      </div>
+    </div>
+
+    <div class="rc">
+      <div class="rc-img">🌿<div class="rc-verified">✓ Confermato</div><div class="rc-trust">⭐ Top Guest</div></div>
+      <div class="rc-body">
+        <div class="rc-title">Loft Oltrarno Design</div>
+        <div class="rc-sub">📍 Oltrarno · Studio · 45m²</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+          <span style="font-size:10px;background:var(--sky2);color:var(--teal);padding:2px 8px;border-radius:100px;font-weight:700">Terrazza</span>
+          <span style="font-size:10px;background:var(--sky2);color:var(--teal);padding:2px 8px;border-radius:100px;font-weight:700">Aria cond.</span>
+        </div>
+        <div class="rc-foot"><div class="rc-price">€340 <small>/ 2 notti</small></div><div class="rc-cta">Scegli →</div></div>
+      </div>
+    </div>
+
+    <div class="rc">
+      <div class="rc-img">🏰<div class="rc-verified">✓ Confermato</div><div class="rc-trust">🔵 Базовый</div></div>
+      <div class="rc-body">
+        <div class="rc-title">Casa Ponte Vecchio</div>
+        <div class="rc-sub">📍 Lungarno · 3 camere · 90m²</div>
+        <div class="rc-foot"><div class="rc-price">€560 <small>/ 2 notti</small></div><div class="rc-cta">Scegli →</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 6 · HOST DASHBOARD ═══ -->
+<div class="screen" id="s-dash">
+  <div class="dash-hdr">
+    <div class="dh-top">
+      <div><div class="dh-greet">Buonasera,</div><div class="dh-name">Marco 👋</div></div>
+      <div class="dh-av">M</div>
+    </div>
+    <div class="dh-stats">
+      <div class="dhs"><div class="dhs-val">€<span>902</span></div><div class="dhs-lbl">questo mese</div></div>
+      <div class="dhs"><div class="dhs-val"><span>3</span></div><div class="dhs-lbl">richieste</div></div>
+      <div class="dhs"><div class="dhs-val"><span>10</span></div><div class="dhs-lbl">notti</div></div>
+    </div>
+  </div>
+
+  <div class="dash-body">
+    <div class="section-lbl">NUOVE RICHIESTE <span class="pill-tag" style="background:var(--orange);color:white;font-size:10px;padding:3px 10px;border-radius:100px">3 nuove</span></div>
+
+    <div class="notif-card hot" onclick="goScreen('guest-profile')">
+      <div class="nc-icon">🔥</div>
+      <div class="nc-body">
+        <div class="nc-title">Sara M. cerca 9–11 feb</div>
+        <div class="nc-sub">2 ospiti · €600 · centro Firenze · <strong style="color:var(--green)">🟢 Verificata</strong></div>
+        <div class="nc-actions">
+          <button class="nc-confirm" onclick="event.stopPropagation();goScreen('contract')">✓ Conferma</button>
+          <button class="nc-decline" onclick="event.stopPropagation()">✕ Rifiuta</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="notif-card">
+      <div class="nc-icon">💬</div>
+      <div class="nc-body">
+        <div class="nc-title">Luca B. ha scritto</div>
+        <div class="nc-sub">"C'è parcheggio nelle vicinanze?"</div>
+      </div>
+    </div>
+
+    <div class="section-lbl" style="margin-top:20px">CALENDARIO <a onclick="goScreen('calendar')">Vedi tutto →</a></div>
+
+    <!-- Mini calendar preview -->
+    <div style="background:white;border-radius:18px;padding:16px;border:1.5px solid var(--border);margin-bottom:16px;cursor:pointer" onclick="goScreen('calendar')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--text)">Febbraio 2026</div>
+        <div style="font-size:12px;color:var(--teal);font-weight:600">10 notti occupate</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+        ${[...Array(28)].map((_,i)=>{
+          const d=i+1;
+          let cls='';
+          if([9,10,11].includes(d)) cls='background:var(--teal);color:white;';
+          else if([14,15,16,17].includes(d)) cls='background:var(--sky2);color:var(--teal);';
+          else if(d===19) cls='border:2px solid var(--orange);font-weight:700;';
+          return `<div style="aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;${cls}">${d}</div>`;
+        }).join('')}
+      </div>
+      <div style="display:flex;gap:12px;margin-top:10px">
+        <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--mid)"><div style="width:10px;height:10px;border-radius:3px;background:var(--teal)"></div>Prenotato</div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--mid)"><div style="width:10px;height:10px;border-radius:3px;background:var(--sky2)"></div>In attesa</div>
+      </div>
+    </div>
+
+    <div class="section-lbl">CONTRATTI <a onclick="goScreen('contract')">Crea →</a></div>
+    <div style="background:white;border-radius:16px;padding:14px;border:1.5px solid var(--border);display:flex;gap:12px;align-items:center;cursor:pointer;margin-bottom:10px" onclick="goScreen('contract')">
+      <div style="width:42px;height:42px;border-radius:13px;background:rgba(26,122,90,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📄</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px">Sara M. · 9–11 feb</div>
+        <div style="font-size:12px;color:var(--mid)">Contratto generato · In attesa di firma</div>
+      </div>
+      <div style="font-size:11px;font-weight:700;background:rgba(255,122,0,.1);color:var(--orange);padding:3px 10px;border-radius:100px">⏳ Firma</div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab-item on"><div class="ti-icon">🏠</div><div class="ti-label">Home</div></div>
+    <div class="tab-item" onclick="goScreen('calendar')"><div class="ti-icon">📅</div><div class="ti-label">Calendario</div></div>
+    <div class="tab-item" onclick="goScreen('contract')"><div class="ti-icon">📄</div><div class="ti-label">Contratti</div></div>
+    <div class="tab-item"><div class="ti-icon">💬</div><div class="ti-label">Chat</div></div>
+    <div class="tab-item"><div class="ti-icon">👤</div><div class="ti-label">Profilo</div></div>
+  </div>
+</div>
+
+<!-- ═══ 7 · CALENDAR ═══ -->
+<div class="screen" id="s-calendar">
+  <div class="sb"><span>22:48</span><div class="sb-icons">📶 🔋</div></div>
+  <div class="app-bar">
+    <div class="ab-top">
+      <button class="back" onclick="goScreen('dash')">←</button>
+      <span class="ab-title">Calendario occupazione</span>
+      <div style="width:36px"></div>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <div class="cal-wrap">
+      <div class="cal-month-nav">
+        <button class="cal-nav-btn">‹</button>
+        <div class="cal-month-title">Febbraio 2026</div>
+        <button class="cal-nav-btn">›</button>
+      </div>
+
+      <div class="cal-grid-head">
+        <div class="cal-dow">L</div><div class="cal-dow">M</div><div class="cal-dow">M</div>
+        <div class="cal-dow">G</div><div class="cal-dow">V</div><div class="cal-dow">S</div>
+        <div class="cal-dow">D</div>
+      </div>
+
+      <div class="cal-grid">
+        <!-- empty days before 1st (Monday) -->
+        <div class="cal-day empty"></div>
+        <div class="cal-day empty"></div>
+        <div class="cal-day empty"></div>
+        <div class="cal-day empty"></div>
+        <div class="cal-day empty"></div>
+        <div class="cal-day">1</div>
+        <div class="cal-day">2</div>
+        <div class="cal-day">3</div>
+        <div class="cal-day">4</div>
+        <div class="cal-day">5</div>
+        <div class="cal-day">6</div>
+        <div class="cal-day">7</div>
+        <div class="cal-day">8</div>
+        <div class="cal-day booked">9</div>
+        <div class="cal-day booked">10</div>
+        <div class="cal-day booked">11</div>
+        <div class="cal-day">12</div>
+        <div class="cal-day">13</div>
+        <div class="cal-day pending">14</div>
+        <div class="cal-day pending">15</div>
+        <div class="cal-day pending">16</div>
+        <div class="cal-day pending">17</div>
+        <div class="cal-day">18</div>
+        <div class="cal-day today">19</div>
+        <div class="cal-day">20</div>
+        <div class="cal-day">21</div>
+        <div class="cal-day">22</div>
+        <div class="cal-day blocked">23</div>
+        <div class="cal-day blocked">24</div>
+        <div class="cal-day blocked">25</div>
+        <div class="cal-day">26</div>
+        <div class="cal-day">27</div>
+        <div class="cal-day">28</div>
+      </div>
+
+      <div class="cal-legend">
+        <div class="cl-item"><div class="cl-dot" style="background:var(--teal)"></div>Prenotato</div>
+        <div class="cl-item"><div class="cl-dot" style="background:rgba(255,122,0,.2);border:1px solid var(--orange)"></div>In attesa</div>
+        <div class="cl-item"><div class="cl-dot" style="background:var(--border)"></div>Bloccato</div>
+        <div class="cl-item"><div class="cl-dot" style="border:2px solid var(--orange)"></div>Oggi</div>
+      </div>
+
+      <div class="section-lbl">PRENOTAZIONI CONFERMATI</div>
+      <div class="booking-list">
+        <div class="bl-item">
+          <div class="bli-left">
+            <div class="bli-name">Sara M. <span style="font-size:11px;color:var(--green);font-weight:700">🟢 Verificata</span></div>
+            <div class="bli-dates">9 feb → 11 feb · 2 notti · 2 ospiti</div>
+          </div>
+          <div class="bli-price">€190</div>
+        </div>
+        <div class="bl-item" style="border-color:rgba(255,122,0,.3);background:#FFF8F2">
+          <div class="bli-left">
+            <div class="bli-name">Luca B. <span style="font-size:11px;color:var(--orange);font-weight:700">⏳ In attesa</span></div>
+            <div class="bli-dates">14 feb → 17 feb · 3 notti</div>
+          </div>
+          <div class="bli-price">€285</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding-bottom:20px">
+        <div style="background:var(--sky2);border-radius:16px;padding:16px;text-align:center;border:1px solid var(--sky)">
+          <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--teal);margin-bottom:4px">INCASSO STIMATO FEBBRAIO</div>
+          <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--teal);letter-spacing:-1px">€475</div>
+          <div style="font-size:12px;color:var(--mid);margin-top:4px">5 notti confermate · zero commissioni</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab-item" onclick="goScreen('dash')"><div class="ti-icon">🏠</div><div class="ti-label">Home</div></div>
+    <div class="tab-item on"><div class="ti-icon">📅</div><div class="ti-label">Calendario</div></div>
+    <div class="tab-item" onclick="goScreen('contract')"><div class="ti-icon">📄</div><div class="ti-label">Contratti</div></div>
+    <div class="tab-item"><div class="ti-icon">💬</div><div class="ti-label">Chat</div></div>
+    <div class="tab-item"><div class="ti-icon">👤</div><div class="ti-label">Profilo</div></div>
+  </div>
+</div>
+
+<!-- ═══ 8 · CONTRACT ═══ -->
+<div class="screen" id="s-contract">
+  <div class="sb"><span>22:48</span><div class="sb-icons">📶 🔋</div></div>
+  <div class="app-bar">
+    <div class="ab-top">
+      <button class="back" onclick="goScreen('dash')">←</button>
+      <span class="ab-title">Contratto di affitto</span>
+      <div style="width:36px"></div>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <div class="contract-body">
+      <div class="contract-hero">
+        <span class="ch-icon">📄</span>
+        <div class="ch-title">Contratto generato dall'IA</div>
+        <div class="ch-sub">Contratto di locazione turistica breve conforme alla normativa italiana. Revisiona e firma digitalmente.</div>
+      </div>
+
+      <div class="ai-gen-badge">
+        <span>✨</span>
+        Generato automaticamente · Conforme D.Lgs. 50/2017 · Legge 431/98
+      </div>
+
+      <div class="contract-info">
+        <div class="ci-row"><span class="ci-label">Locatore</span><span class="ci-value">Marco Rossi</span></div>
+        <div class="ci-row"><span class="ci-label">Conduttore</span><span class="ci-value">Sara Martini 🟢</span></div>
+        <div class="ci-row"><span class="ci-label">Immobile</span><span class="ci-value">Via Da Vinci 17, FI</span></div>
+        <div class="ci-row"><span class="ci-label">Periodo</span><span class="ci-value">9–11 febbraio 2026</span></div>
+        <div class="ci-row"><span class="ci-label">Canone</span><span class="ci-value">€190 totali</span></div>
+        <div class="ci-row"><span class="ci-label">Deposito</span><span class="ci-value">€200 (escrow)</span></div>
+        <div class="ci-row"><span class="ci-label">Ospiti</span><span class="ci-value">2 persone</span></div>
+      </div>
+
+      <div class="contract-preview">
+        <div class="cp-watermark">LOCANDA</div>
+        <div class="cp-title">CONTRATTO DI LOCAZIONE AD USO TURISTICO</div>
+        <div class="cp-text">
+          Il/La Sig./Sig.ra <strong>Marco Rossi</strong>, di seguito denominato "Locatore", concede in locazione turistica breve all'ospite <strong>Sara Martini</strong>, di seguito denominato "Conduttore", l'immobile sito in <strong>Via Leonardo Da Vinci 17, Firenze (FI)</strong>, per il periodo dal <strong>9 al 11 febbraio 2026</strong>.<br><br>
+          Il canone di locazione è pari a <strong>€190,00</strong> da corrispondere interamente prima del check-in. Un deposito cauzionale di <strong>€200,00</strong> è trattenuto in escrow dalla piattaforma locanda e sarà restituito entro 48h dal check-out in assenza di danni...
+        </div>
+      </div>
+
+      <div class="sign-area" onclick="this.innerHTML='<div style=\'font-size:36px;margin-bottom:8px\'>✅</div><div style=\'font-size:14px;font-weight:700;color:var(--green)\'>Firmato digitalmente</div><div style=\'font-size:12px;color:var(--mid)\'>Marco Rossi · 19 feb 2026 22:48</div>'">
+        <div class="sign-icon">✍️</div>
+        <div class="sign-title">Firma digitalmente</div>
+        <div class="sign-sub">Tocca per apporre la firma · Legalmente valida in Italia</div>
+      </div>
+
+      <div style="display:flex;gap:10px;padding-bottom:24px">
+        <button style="flex:1;padding:14px;background:var(--sky2);color:var(--teal);border:1.5px solid var(--sky);border-radius:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">📤 Condividi</button>
+        <button class="btn-orange" style="flex:2" onclick="goScreen('dash')">✓ Invia all'ospite →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 9 · GUEST PROFILE (host view) ═══ -->
+<div class="screen" id="s-guest-profile">
+  <div class="sb"><span>22:48</span><div class="sb-icons">📶 🔋</div></div>
+  <div class="app-bar">
+    <div class="ab-top">
+      <button class="back" onclick="goScreen('dash')">←</button>
+      <span class="ab-title">Profilo ospite</span>
+      <div style="width:36px"></div>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <div class="gp-body">
+      <div class="gp-hero">
+        <div class="gp-avatar">👩‍💼<div class="gp-level">🟢</div></div>
+        <div class="gp-name">Sara Martini</div>
+        <div class="gp-member">Membro da gennaio 2025 · Milano</div>
+        <div class="gp-badges">
+          <div class="gpb blue">🔵 Email verificata</div>
+          <div class="gpb green">🟢 Documento verificato</div>
+          <div class="gpb gold">⭐ 4 soggiorni</div>
+        </div>
+      </div>
+
+      <div class="gp-stats">
+        <div class="gps"><div class="gps-val">4</div><div class="gps-lbl">soggiorni</div></div>
+        <div class="gps"><div class="gps-val">4.9</div><div class="gps-lbl">valutazione</div></div>
+        <div class="gps"><div class="gps-val">0</div><div class="gps-lbl">incidenti</div></div>
+      </div>
+
+      <div class="gp-section">
+        <div class="gps-title">Verifica identità</div>
+        <div class="verify-row"><div class="vr-icon">📧</div><div class="vr-label">Email confermata</div><div class="vr-status vr-ok">✓ OK</div></div>
+        <div class="verify-row"><div class="vr-icon">🪪</div><div class="vr-label">Carta d'identità</div><div class="vr-status vr-ok">✓ Verificata</div></div>
+        <div class="verify-row"><div class="vr-icon">🤳</div><div class="vr-label">Selfie + documento</div><div class="vr-status vr-ok">✓ Abbinato</div></div>
+        <div class="verify-row"><div class="vr-icon">📱</div><div class="vr-label">Numero di telefono</div><div class="vr-status vr-ok">✓ Verificato</div></div>
+      </div>
+
+      <div class="gp-section">
+        <div class="gps-title">Recensioni ricevute</div>
+        <div class="review-item">
+          <div class="ri-top"><div class="ri-name">Luigi P. · Venezia</div><div class="ri-stars">★★★★★</div></div>
+          <div class="ri-text">Ospite impeccabile, appartamento lasciato in perfette condizioni. Consigliatissima!</div>
+        </div>
+        <div class="review-item">
+          <div class="ri-top"><div class="ri-name">Anna M. · Roma</div><div class="ri-stars">★★★★★</div></div>
+          <div class="ri-text">Puntuale, rispettosa. Tornerebbe quando vuole.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;padding-bottom:24px">
+        <button style="flex:1;padding:14px;background:var(--sky2);color:var(--teal);border:1.5px solid var(--sky);border-radius:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer" onclick="goScreen('guest')">💬 Scrivi</button>
+        <button class="btn-orange" style="flex:2" onclick="goScreen('contract')">✓ Accetta e contratto →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /phone -->
+
+<!-- NAV -->
+<div class="nav-flow">
+  <button class="nf-btn on" id="nb-welcome" onclick="goScreen('welcome')">1·Welcome</button>
+  <button class="nf-btn" id="nb-verify" onclick="goScreen('verify')">2·Verifica</button>
+  <button class="nf-btn" id="nb-guest" onclick="goScreen('guest')">3·Chat IA</button>
+  <button class="nf-btn" id="nb-history" onclick="goScreen('history')">4·Storico</button>
+  <button class="nf-btn" id="nb-results" onclick="goScreen('results')">5·Risultati</button>
+  <button class="nf-btn" id="nb-dash" onclick="goScreen('dash')">6·Dashboard</button>
+  <button class="nf-btn" id="nb-calendar" onclick="goScreen('calendar')">7·Calendario</button>
+  <button class="nf-btn" id="nb-contract" onclick="goScreen('contract')">8·Contratto</button>
+  <button class="nf-btn" id="nb-guestprofile" onclick="goScreen('guest-profile')">9·Profilo ospite</button>
+</div>
+
+<script>
+const SM = {
+  'welcome':'s-welcome','verify':'s-verify','guest':'s-guest',
+  'history':'s-history','results':'s-results','dash':'s-dash',
+  'calendar':'s-calendar','contract':'s-contract','guest-profile':'s-guest-profile'
+};
+const NM = {
+  'welcome':'nb-welcome','verify':'nb-verify','guest':'nb-guest',
+  'history':'nb-history','results':'nb-results','dash':'nb-dash',
+  'calendar':'nb-calendar','contract':'nb-contract','guest-profile':'nb-guestprofile'
+};
+
+function goScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nf-btn').forEach(b => b.classList.remove('on'));
+  if(SM[name]) document.getElementById(SM[name]).classList.add('active');
+  if(NM[name]) document.getElementById(NM[name]).classList.add('on');
+}
+
+let role = 'guest';
+function setRole(r) {
+  role = r;
+  document.getElementById('tog-guest').classList.toggle('on', r==='guest');
+  document.getElementById('tog-host').classList.toggle('on', r==='host');
+  document.getElementById('w-desc').textContent = r==='guest'
+    ? "Trova l'appartamento perfetto. L'IA cerca tra proprietari verificati."
+    : "Pubblica il tuo immobile in 2 minuti. L'IA scrive la descrizione dalle tue foto.";
+  document.querySelector('#s-welcome .btn-orange').onclick = ()=> goScreen(r==='guest'?'verify':'dash');
+}
+
+function selectLevel(el) {
+  document.querySelectorAll('.tl-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function sendChat() {
+  const t = document.getElementById('ci-text');
+  const txt = t.value.trim(); if(!txt) return;
+  const area = document.getElementById('chat-msgs');
+  const typing = document.getElementById('typing-msg');
+  const m = document.createElement('div');
+  m.className='msg user';
+  m.innerHTML=`<div class="bubble user">${txt}</div>`;
+  area.insertBefore(m, typing);
+  t.value=''; area.scrollTop=999999;
+  setTimeout(()=>{ goScreen('results'); }, 1800);
+}
+
+// Init
+document.querySelector('#s-welcome .btn-orange').onclick = ()=> goScreen('verify');
+</script>
+</body>
+</html>
