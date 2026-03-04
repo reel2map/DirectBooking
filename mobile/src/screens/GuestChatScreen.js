@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   SafeAreaView, ScrollView, TextInput, KeyboardAvoidingView,
-  Platform, ActivityIndicator,
+  Platform, ActivityIndicator, Alert,
 } from 'react-native';
 import { colors, radius } from '../theme';
+import { sendMessageToClaude } from '../services/claudeApi';
 
 const SUGGESTIONS = [
   '🏠 Roma · 2 camere · fino a €1200',
@@ -34,19 +35,22 @@ export default function GuestChatScreen({ navigation }) {
     if (!userText) return;
 
     const userMsg = { id: Date.now(), role: 'user', text: userText };
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     setInput('');
     setLoading(true);
 
-    // Simulate AI response (replace with real Claude API call)
-    setTimeout(() => {
-      const aiReply = generateAIReply(userText);
+    try {
+      const reply = await sendMessageToClaude(updatedMessages);
       setMessages((prev) => [
         ...prev,
-        { id: Date.now() + 1, role: 'ai', text: aiReply },
+        { id: Date.now() + 1, role: 'ai', text: reply },
       ]);
+    } catch (err) {
+      Alert.alert('Errore', err.message || 'Impossibile contattare l\'AI. Riprova.');
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -166,19 +170,6 @@ export default function GuestChatScreen({ navigation }) {
   );
 }
 
-function generateAIReply(userText) {
-  const lower = userText.toLowerCase();
-  if (lower.includes('roma') || lower.includes('rome')) {
-    return 'Perfetto! Ho trovato 8 proprietari disponibili a Roma 🏛️\n\nSto inviando la tua richiesta ai proprietari verificati con appartamenti che corrispondono alle tue preferenze. Riceverai le offerte entro 30 minuti!\n\nVuoi specificare un quartiere? (Trastevere, Prati, Testaccio...)';
-  }
-  if (lower.includes('milano') || lower.includes('milan')) {
-    return 'Milano — ottima scelta! 🏙️\n\nHo 12 proprietari disponibili in zona Navigli, Brera e Centro. Sto contattando quelli con valutazione ⭐ 4.8+.\n\nBudget mensile? Ti aiuta a ricevere offerte più precise.';
-  }
-  if (lower.includes('budget') || lower.includes('euro') || lower.includes('€')) {
-    return 'Budget ricevuto ✅\n\nSto filtrando le offerte nel tuo range di prezzo. I proprietari DirectBooking non applicano commissioni, quindi il prezzo che vedi è quello che paghi.\n\nVuoi vedere i risultati disponibili ora?';
-  }
-  return 'Ho capito la tua richiesta! 🔍\n\nSto contattando i proprietari verificati nella zona che cerchi. Di solito ci vogliono 20-30 minuti per ricevere le prime offerte.\n\nPosso anche mostrarti appartamenti disponibili subito — vuoi vedere i risultati?';
-}
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
