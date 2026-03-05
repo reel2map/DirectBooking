@@ -9,6 +9,7 @@ import ResultsScreen from '../screens/ResultsScreen';
 import BookingDetailScreen from '../screens/BookingDetailScreen';
 import PaymentScreen from '../screens/PaymentScreen';
 import HostDashboardScreen from '../screens/HostDashboardScreen';
+import CreateListingScreen from '../screens/CreateListingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,6 +18,7 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        <Stack.Screen name="CreateListing" component={CreateListingScreen} />
         <Stack.Screen name="Verify" component={VerifyScreen} />
         <Stack.Screen name="GuestChat" component={GuestChatScreen} />
         <Stack.Screen name="Results" component={ResultsScreen} />

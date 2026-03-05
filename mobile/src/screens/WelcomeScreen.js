@@ -49,7 +49,11 @@ export default function WelcomeScreen({ navigation }) {
         {/* CTA */}
         <TouchableOpacity
           style={styles.btn}
-          onPress={() => navigation.navigate('Verify', { mode })}
+          onPress={() =>
+            mode === 'host'
+              ? navigation.navigate('CreateListing')
+              : navigation.navigate('Verify', { mode })
+          }
         >
           <Text style={styles.btnText}>
             {mode === 'guest' ? 'Inizia a cercare →' : 'Pubblica il tuo annuncio →'}
