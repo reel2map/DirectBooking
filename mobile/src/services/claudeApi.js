@@ -1,9 +1,15 @@
 import Constants from 'expo-constants';
 
 const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages';
-const API_KEY =
-  process.env.EXPO_PUBLIC_CLAUDE_API_KEY ||
-  Constants.expoConfig?.extra?.claudeApiKey;
+
+function getApiKey() {
+  return (
+    process.env.EXPO_PUBLIC_CLAUDE_API_KEY ||
+    Constants.expoConfig?.extra?.claudeApiKey ||
+    Constants.manifest?.extra?.claudeApiKey ||
+    Constants.manifest2?.extra?.expoClient?.extra?.claudeApiKey
+  );
+}
 
 const SYSTEM_PROMPT = `Sei l'assistente AI di DirectBooking — una piattaforma italiana di affitto diretto senza commissioni tra proprietari e inquilini.
 
@@ -28,7 +34,8 @@ Stile di risposta:
 - Quando hai abbastanza info, proponi di mostrare i risultati disponibili`;
 
 export async function sendMessageToClaude(messages) {
-  if (!API_KEY) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
     throw new Error('Claude API key non configurata');
   }
 
@@ -36,7 +43,7 @@ export async function sendMessageToClaude(messages) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
+      'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
