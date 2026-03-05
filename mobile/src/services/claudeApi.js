@@ -1,5 +1,9 @@
+import Constants from 'expo-constants';
+
 const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages';
-const API_KEY = process.env.EXPO_PUBLIC_CLAUDE_API_KEY;
+const API_KEY =
+  process.env.EXPO_PUBLIC_CLAUDE_API_KEY ||
+  Constants.expoConfig?.extra?.claudeApiKey;
 
 const SYSTEM_PROMPT = `Sei l'assistente AI di DirectBooking — una piattaforma italiana di affitto diretto senza commissioni tra proprietari e inquilini.
 
